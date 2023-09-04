@@ -1,4 +1,5 @@
 ﻿using Common.Console;
+using Common.Cryptography;
 using Common.Setting;
 using Common.Threading;
 using System.Net.Sockets;
@@ -30,6 +31,7 @@ namespace Common.Network
         private Action<Msg, Client> _onMessage;
         private Socket _socket;
         private McStreamReader _stream;
+        private IEncryption _encryption = new DummyEncryption();
         private mAddr _addr;
         private TaskPool _pool = new TaskPool(3);
         public Client(Socket socket, Action<Msg,Client> onMessage)
@@ -70,30 +72,60 @@ namespace Common.Network
             if (_State == ConnState.Login)
                 Display.WriteInfo($"Login request from {GetAddr()} version: {ver} to {addr}:{port} ");
 
-            _ = _stream.ReadBytes(2); // status?
+             // status?
 
-            using (Msg msg = new Msg(PacketId.STATUS))
+            if (_State == ConnState.Status)
             {
-                msg.WriteString($"{{\"version\":{{\"name\":\"SharpCraft\",\"protocol\":{Settings.GetSetting("protocol_ver")}}},\"enforcesSecureChat\":true,\"description\":{{\"text\":\"A Minecraft Server\"}},\"players\":{{\"max\":69,\"online\":0}},\"preventsChatReports\":true}}");
-                Send((byte[])msg);
+                _ = _stream.ReadBytes(2);
+                using (Msg msg = new Msg(PacketId.STATUS))
+                {
+
+                    msg.WriteString($"{{\"version\":{{\"name\":\"SharpCraft\",\"protocol\":{Settings.GetSetting("protocol_ver")}}},\"enforcesSecureChat\":true,\"description\":{{\"text\":\"A Minecraft Server\"}},\"players\":{{\"max\":69,\"online\":0}},\"preventsChatReports\":true}}");
+                    Send((byte[])msg);
+                }
+                Send(_stream.ReadBytes(10));
             }
-
-            Send(_stream.ReadBytes(10));
-
-            //_ = _stream.ReadInt(); // size;
-            //_ = _stream.ReadInt(); // id;
-            //BigInteger longInt = new BigInteger(_stream.ReadBytes(sizeof(long)));
+            
             return;
         }
-        public void Send(byte[] buff)
+        public void HandleLogin()
         {
-            _pool.EnqueueTask(() => { _socket.Send(buff); }); // can be disposed bc async something that shouold be fixed!
+            _ = _stream.ReadInt(); // size;
+            _ = _stream.ReadInt(); // id;
+            string username = _stream.ReadString();
+            byte hasUid = _stream.ReadByte();
+
+            byte[]? uid = null;
+            if (hasUid == 1)
+                uid = _stream.ReadBytes(16);
+
+            Rsa rsa = new Rsa();
+
+            Msg msg = new Msg(PacketId.ENCRYPTIONREQUEST);
+            msg.WriteString("Lyza C# Server");
+            //write Prefixed bytes breaks everything for some reason!
+            msg.WritePrefixedBytes(rsa.Get509Cert());
+            byte[] ranBuff = new byte[4];
+            new Random().NextBytes(ranBuff);
+            msg.WritePrefixedBytes(ranBuff);
+
+            Send((byte[])msg);
+
+            byte[] key = rsa.Decrypt(_stream.ReadPrefixedBytes()); // bytes we received are invalid somehow?
+            lock (_encryption)
+                _encryption = new AesEncryption(key);
+
+            byte[] validationToken = rsa.Decrypt(_stream.ReadPrefixedBytes());
+
         }
+        public void Send(byte[] buff)
+            => _pool.EnqueueTask(() => { _socket.Send(_encryption.Encrypt(buff)); }); //TODO: fix can be disposed bc async something that shouold be fixed!
+        
         public void Listen()
         {
             while (_socket.Connected)
             {
-                byte[] buff = new byte[7];
+                byte[] buff = new byte[2]; // smallest packet possible techincally, Size + Id
                 try
                 {
 

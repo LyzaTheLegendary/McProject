@@ -35,6 +35,13 @@ namespace Common.Network
             _stream.ReadExactly(bytes, 0, count);
             return bytes;
         }
+        public byte[] ReadPrefixedBytes()
+        {
+            int size = ReadInt();
+            byte[] buff = new byte[size];
+            _stream.ReadExactly(buff);
+            return buff;
+        }
         public string ReadString()
         {
             byte[] stringBytes = new byte[ReadInt()];

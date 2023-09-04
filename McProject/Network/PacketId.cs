@@ -10,5 +10,7 @@ namespace Common.Network
     {
         STATUS = 0,
         PINGRESPONSE = 1,
+        ENCRYPTIONREQUEST = 1,
+        KICK = 0,
     }
 }

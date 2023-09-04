@@ -60,7 +60,7 @@ namespace Common.Network
     //        {
     //        }
     //    }
-    public class Msg : IDisposable
+    public class Msg : IDisposable // TODO for some reason it duplicates itself many times when sending!
     {
         private List<byte> _buff = new();
 
@@ -93,7 +93,13 @@ namespace Common.Network
         public void WriteString(string text)
         {
             WriteInt(text.Length);
-            _buff = _buff.Concat(Encoding.UTF8.GetBytes(text)).ToList();
+            _buff.AddRange(Encoding.UTF8.GetBytes(text));
+        }
+
+        public void WritePrefixedBytes(byte[] buff)
+        {
+            WriteInt(buff.Length);
+            _buff.AddRange(buff); //= _buff.Concat(_buff).ToList();
         }
 
         public static explicit operator byte[](Msg msg)
@@ -105,6 +111,6 @@ namespace Common.Network
             return msg._buff.Concat(list).ToArray();
         }
 
-        public void Dispose() { _buff.Clear(); }
+        public void Dispose() { }
     }
 }
