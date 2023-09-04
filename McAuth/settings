@@ -1,0 +1,12 @@
+// existing types!
+// str , int, float, array. Array values are seperated by ,'s!
+// format type:key:value
+
+str:web_addr:localhost
+int:web_port:8080
+str:web_username:test
+str:web_password:test
+
+str:auth_addr:127.0.0.1
+int:auth_port:25565
+int:protocol_ver:763
