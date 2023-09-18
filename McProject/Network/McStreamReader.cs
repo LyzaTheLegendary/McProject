@@ -8,6 +8,7 @@ namespace Common.Network
         private Stream _stream;
         public McStreamReader(Stream stream)
             => _stream = stream;
+        public Stream GetStream() => _stream;
         public int ReadInt()
         {
             int value = 0, position = 0, currentByte;

@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using Common.Console;
+using Common.Helpers;
+using System.Collections.Concurrent;
 
 namespace Common.Threading
 {
@@ -32,7 +34,13 @@ namespace Common.Threading
         {
             foreach (Action task in taskQueue.GetConsumingEnumerable())
             {
-                task?.Invoke(); // sometimes disposed?
+                try
+                {
+                    task?.Invoke(); // sometimes disposed?
+                }catch(Exception ex)
+                {
+                    Display.WriteError(ErrorHelper.GetErrorMsg(ex));
+                }
                 if (cancelToken.IsCancellationRequested)
                     return;
             }

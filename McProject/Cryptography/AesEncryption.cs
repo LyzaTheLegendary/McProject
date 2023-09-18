@@ -15,20 +15,23 @@ namespace Common.Cryptography
             _aes.Key = key;
             _aes.IV = (byte[])key.Clone();
         }
-        public byte[] Decrypt(byte[] encryptedBuff)
+        public void Decrypt(byte[] encryptedBuff)
         {
             throw new NotImplementedException();
         }
 
-        public byte[] Encrypt(byte[] buff)
-        {
-            throw new NotImplementedException();
+        public void Encrypt(byte[] buff)
+        { 
+            using (MemoryStream ms = new(buff))
+                using (CryptoStream crypto = new(ms, _aes.CreateEncryptor(), CryptoStreamMode.Write))
+                {
+                    crypto.Write(buff);
+                    crypto.FlushFinalBlock(); // finish up the block so it can decrypt it! as AES works in blocks and all of those have to be completed for it to be able to work
+                }
         }
 
         public CryptoStream GetStream(Stream stream)
-        {
-            throw new NotImplementedException();
-        }
+            => new CryptoStream(stream, _aes.CreateEncryptor(), CryptoStreamMode.Read);
 
         public bool isValid() => _isValid;
 

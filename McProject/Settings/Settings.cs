@@ -36,9 +36,11 @@ namespace Common.Setting
 
                     if (lineInfo.Length != 3)
                         throw new mException($"Invalid line in {path} on line:{lineCount}");
-
+                    //Display.Write($"{lineInfo[0]}:{lineInfo[1]}:{lineInfo[2]}");
                     if (lineInfo[0]      == "str")
                         values.Add(lineInfo[1], lineInfo[2]);
+                    else if (lineInfo[0] == "byte")
+                        values.Add(lineInfo[1], byte.Parse(lineInfo[2]));
                     else if (lineInfo[0] == "int")
                         values.Add(lineInfo[1], int.Parse(lineInfo[2]));
                     else if (lineInfo[0] == "float")

@@ -135,7 +135,7 @@ namespace Common.Console
 
             Stream outStream = context.Response.OutputStream;
 
-            string htmlDoc = File.ReadAllText("Terminal.html");
+            string htmlDoc = File.ReadAllText("Resource/Terminal.html");
             htmlDoc = htmlDoc.Replace("{#@WEB_ADDR@#}",  "ws" + stringAddr);
 
 

@@ -12,5 +12,9 @@ namespace Common.Network
         PINGRESPONSE = 1,
         ENCRYPTIONREQUEST = 1,
         KICK = 0,
+        COMPRESSIONREQUEST = 3,
+        LOGINSUCCESS = 2,
+        DOTICK = 0,
+        JOIN_INFO = 40,
     }
 }

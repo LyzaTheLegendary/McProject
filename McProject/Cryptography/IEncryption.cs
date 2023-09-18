@@ -5,8 +5,8 @@ namespace Common.Cryptography
     public interface IEncryption
     {
         public CryptoStream GetStream(Stream stream);
-        public byte[] Decrypt(byte[] encryptedBuff);
-        public byte[] Encrypt(byte[] buff);
+        public void Decrypt(byte[] encryptedBuff);
+        public void Encrypt(byte[] buff);
         public bool isValid();
     }
 }

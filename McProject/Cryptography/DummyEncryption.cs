@@ -4,9 +4,9 @@ namespace Common.Cryptography
 {
     public class DummyEncryption : IEncryption
     {
-        public byte[] Decrypt(byte[] encryptedBuff) => encryptedBuff;
+        public void Decrypt(byte[] encryptedBuff) { }
 
-        public byte[] Encrypt(byte[] buff) => buff;
+        public void Encrypt(byte[] buff) { }
 
         public CryptoStream GetStream(Stream stream)
         {
