@@ -6,6 +6,7 @@ using Common.Helpers;
 using AuroraEngine.Scripting;
 using AuroraEngine.GameObjects.Creatures;
 using Common.Setting;
+using AuroraEngine.Worlds;
 
 namespace Gs
 { 
@@ -60,8 +61,24 @@ namespace Gs
             msg.WriteByte((byte)Settings.GetSetting("hard_core"));
             msg.WriteByte((byte)Settings.GetSetting("game_mode"));
             msg.WriteByte(0); // previous game mode
-            msg.WriteInt(3); // overworld, the end, the nether.
-            // next up is dimension list
+
+            //(int count, string worldInfo) = World.GetWorldInfo();
+            Dimension[] dimensions = World.GetAllDimensions();
+
+             
+
+            msg.WriteInt(dimensions.Length); // overworld, the end, the nether.
+            foreach(Dimension dimension in dimensions)
+                msg.WriteString(dimension.GetDimensionIdentifier());  // A list of compound tags like, "minecraft:overworld" , "minecraft:end" , "minecraft:the_nether"
+
+            //registery codec idk kys
+
+            Dimension overworld = (from dimension in dimensions where dimension._dimensionType == DimensionTypes.OVERWORLD select dimension).First();
+            // send type minecraft:flat_world????
+            msg.WriteString(overworld.GetDimensionIdentifier());
+            //msg.WriteString(worldInfo); //  dimension list (FKED NBT) // should be next one!
+
+
 
 
             // send world / player information

@@ -1,7 +1,7 @@
 ﻿using AuroraEngine.Worlds;
 using Common.Console;
 
-namespace Common.AuroraEngine.Storage
+namespace AuroraEngine.Storage
 {
     /* TODO IMPLEMENT THIS 
 When using memory-mapped files in C#, the behavior depends on whether you are using persisted or non-persisted memory-mapped files1.
@@ -45,7 +45,7 @@ It’s important to choose the appropriate type of memory-mapped file based on y
                 BinaryReader reader = new(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Inheritable));
 
                 byte fileVer = reader.ReadByte();
-                Dimension dimension = new Dimension(reader);
+                Dimension dimension = new Dimension(reader,(byte)i);
                 worlds[i++] = dimension;
             
             }

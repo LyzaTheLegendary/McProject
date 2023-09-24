@@ -1,4 +1,6 @@
-﻿namespace AuroraEngine.Worlds
+﻿using Common;
+
+namespace AuroraEngine.Worlds
 {
     public enum DimensionTypes : byte
     {
@@ -15,17 +17,33 @@
         public readonly DimensionTypes _dimensionType;
         public readonly WorldTypes _worldType;
         private readonly BinaryReader _dimensionStream; // I'm working on the reading part, I don't know yet how I'll do the writing part!
-
+        public readonly byte _id;
         //worldInfoJson = $"  'minecraft:dimension_type': {{\r\n    type: 'minecraft:dimension_type',\r\n    value: [\r\n      {{\r\n        element: {{\r\n          ambient_light: 0,\r\n          bed_works: 1,\r\n          coordinate_scale: 1,\r\n          effects: 'minecraft:overworld',\r\n          has_ceiling: 0,\r\n          has_raids: 1,\r\n          has_skylight: 1,\r\n          height: 384,\r\n          infiniburn: '#minecraft:infiniburn_overworld',\r\n          logical_height: 384,\r\n          min_y: -64,\r\n          monster_spawn_block_light_limit: 0,\r\n          monster_spawn_light_level: {{\r\n            type: 'minecraft:uniform',\r\n            value: {{\r\n              max_inclusive: 7,\r\n              min_inclusive: 0,\r\n            }},\r\n          }},\r\n          natural: 1,\r\n          piglin_safe: 0,\r\n          respawn_anchor_works: 0,\r\n          ultrawarm: 0,\r\n        }},\r\n        id: 0,\r\n        name: 'minecraft:overworld',\r\n      }}";
-        public Dimension(BinaryReader dimensionStream) {
+        public Dimension(BinaryReader dimensionStream, byte id)
+        {
             _dimensionStream = dimensionStream;
             _dimensionType = (DimensionTypes)_dimensionStream.ReadByte();
             _worldType = (WorldTypes)_dimensionStream.ReadByte();
+            _id = id;
         }
+        public string GetDimensionIdentifier()
+        {
+            switch( _dimensionType )
+            {
+                case DimensionTypes.OVERWORLD:
+                    return "minecraft:overworld";
+                case DimensionTypes.THE_NETHER:
+                    return "minecraft:the_nether";
+                case DimensionTypes.THE_END:
+                    return "minecraft:the_end";
+            }
+            throw new mException($"World has invalid dimensia of id:{(byte)_dimensionType} name: {_dimensionType}");
+        }
+        public string GetWorldInfoJson()    
         // should be read from the file!
         public object GetChunk(int x, int y, int z) => throw new NotImplementedException("TODO figure out how to implement chunks!");
         public void SaveWorld() => throw new NotImplementedException();
-        ~Dimension() {
+        ~Dimension() { // save world when implemented
             _dimensionStream.Close();
         }
         //public string GetWorldInfo() => worldInfoJson;

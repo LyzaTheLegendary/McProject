@@ -51,7 +51,7 @@ namespace ClientExtensions.Auth {
             }
         }
         public static void HandleLogin(this Client client)
-        { // TODO: I have a dark feeling something dies in here sometimes, and sometimes works not sure what yet though! but encryption goes wrong writing somehow
+        {
             try
             {
                 _ = client._stream.ReadInt();
@@ -61,7 +61,7 @@ namespace ClientExtensions.Auth {
                 if (client._stream.ReadByte() == 1)
                     client._uid = MarshalHelper.BytesToStructure<Int128>(client._stream.ReadBytes(16));
                 else
-                    throw new NotImplementedException("Haven't found a way to generate a unique number!");
+                    throw new NotImplementedException("Haven't found a way to generate a unique number!"); //TODO: absolutely fucking fix me 
 
                 Rsa rsa = new Rsa();
                 MsgWriter msg = new MsgWriter(PacketId.ENCRYPTIONREQUEST);
@@ -79,6 +79,7 @@ namespace ClientExtensions.Auth {
 
                 lock (client._encryption)
                     client._encryption = new AesEncryption(rsa.Decrypt(client._stream.ReadPrefixedBytes()));
+
                 byte[] validationToken = rsa.Decrypt(client._stream.ReadPrefixedBytes());
                 client._stream = new McStreamReader(client._encryption.GetStream(new NetworkStream(client._socket)));
 
